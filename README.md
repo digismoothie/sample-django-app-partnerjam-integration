@@ -6,13 +6,17 @@ A demo app created using Django and ShopifyAPI `v8.4+`.
 
 To run this app locally, you can clone the repository and do the following.
 
-1. Create a `.env` file to specify this app's `API key` and `API secret key` app credentials that can be found in the Shopify Partners dashboard.
+1. Create a `.env` file to specify this app's `API key` and `API secret key` app credentials that can be found in the Shopify Partners dashboard. PartnerJam related variables can be found in PartnerJam Dashboard.
 
 ```ini
 SHOPIFY_API_KEY=<The API key app credential specified in the Shopify Partners dashboard>
 SHOPIFY_API_SECRET=<The API secret key app credential specified in the Shopify Partners dashboard>
 APP_URL=<The public app URL specified in the Shopify Partners dashboard>
 SCOPES=<Scopes needed for the app>
+
+SHOPIFY_APP_STORE_URL=<URL of your listing in Shopify app store, eg. https://apps.shopify.com/myapp>
+
+
 ```
 
 > __Note:__ It's recommended to follow along the tutorial _[Build a Shopify App with Node and React](https://shopify.dev/apps/getting-started/create#get-a-shopify-api-key)_ to understand how to retrieve the `API key` and `API secret key` app credentials.

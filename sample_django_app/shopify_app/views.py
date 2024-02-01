@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.conf import settings
 from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponse
@@ -7,6 +8,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.apps import apps
 from .models import Shop
 from shopify.utils import shop_url
+from django.utils import timezone
+from django.http import HttpResponseRedirect
+from django.http import Http404
+from datetime import timedelta
 
 import binascii
 import json
@@ -173,3 +178,27 @@ def shopify_session(shopify_domain, access_token):
     api_version = apps.get_app_config("shopify_app").SHOPIFY_API_VERSION
 
     return shopify.Session.temp(shopify_domain, api_version, access_token)
+
+
+def partnerjam_init(request):
+    partner_jam_token = request.GET.get("token")
+    app_store_url = settings.SHOPIFY_APP_STORE_URL  # replace with your app store url
+    print(app_store_url)
+    expiration = timezone.now() + timedelta(
+        days=60,
+    )
+    
+    if not partner_jam_token:
+        raise Http404
+        
+    response = HttpResponseRedirect(app_store_url)
+    response.set_cookie(
+        "partner_jam_token",
+        partner_jam_token,
+        expires=expiration,
+        httponly=True,
+        secure=True,
+        samesite="Lax",
+    )
+    return response
+
