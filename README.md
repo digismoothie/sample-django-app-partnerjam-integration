@@ -15,7 +15,7 @@ APP_URL=<The public app URL specified in the Shopify Partners dashboard>
 SCOPES=<Scopes needed for the app>
 
 SHOPIFY_APP_STORE_URL=<URL of your listing in Shopify app store, eg. https://apps.shopify.com/myapp>
-
+PARTNERJAM_SECRET=<You can find this in PartnerJam dashboard>
 
 ```
 

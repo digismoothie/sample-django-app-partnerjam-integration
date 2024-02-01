@@ -18,6 +18,7 @@ import json
 import os
 import re
 import shopify
+import requests
 
 
 class LoginView(View):
@@ -35,18 +36,32 @@ class LoginView(View):
 def callback(request):
     params = request.GET.dict()
     shop = params.get("shop")
+    partnerjam_token = request.COOKIES.get("partner_jam_token")
 
     try:
         validate_params(request, params)
         access_token, access_scopes = exchange_code_for_access_token(request, shop)
-        store_shop_information(access_token, access_scopes, shop)
+        shop_record = store_shop_information(access_token, access_scopes, shop)
         after_authenticate_jobs(shop, access_token)
+        notify_partnerjam(shop_record, partnerjam_token)
     except ValueError as exception:
         messages.error(request, str(exception))
         return redirect(reverse("login"))
 
     redirect_uri = build_callback_redirect_uri(request, params)
     return redirect(redirect_uri)
+
+def notify_partnerjam(shop_record, partnerjam_token):
+    if not partnerjam_token:
+        return
+    requests.post(
+        'https://be-app.partnerjam.com/webhooks/installation-confirm/',
+        json={
+            'myshopify_domain': shop_record.shopify_domain,
+            'token': partnerjam_token,
+            'secret': settings.PARTNERJAM_SECRET,
+        }
+    )
 
 
 @csrf_exempt
@@ -150,6 +165,7 @@ def store_shop_information(access_token, access_scopes, shop):
     shop_record.access_scopes = access_scopes
 
     shop_record.save()
+    return shop_record
 
 
 def build_callback_redirect_uri(request, params):
@@ -172,6 +188,7 @@ def create_uninstall_webhook(shop, access_token):
         webhook.address = "https://{host}/uninstall".format(host=app_url)
         webhook.format = "json"
         webhook.save()
+        
 
 
 def shopify_session(shopify_domain, access_token):
