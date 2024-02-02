@@ -206,7 +206,6 @@ def shopify_session(shopify_domain, access_token):
 def partnerjam_init(request):
     partner_jam_token = request.GET.get("token")
     app_store_url = settings.SHOPIFY_APP_STORE_URL  # replace with your app store url
-    print(app_store_url)
     expiration = timezone.now() + timedelta(
         days=60,
     )

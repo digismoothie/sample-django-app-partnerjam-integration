@@ -26,7 +26,6 @@ def subscription(request):
     shopify_shop = shopify.Shop.current()
     shop_record = Shop.objects.get(shopify_domain=shopify_shop.myshopify_domain)
     discount = PartnerJamClient.get_discount(shop_record.partnerjam_token)
-    print(discount, 'discount')
     if discount:
         price = full_price * ((100 - discount) / 100)
         plan = f"{plan_name} - {str(discount)}% discount"
