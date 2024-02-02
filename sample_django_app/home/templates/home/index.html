@@ -49,10 +49,9 @@
       });
     }
     function activateSubscription() {
-      console.log('activateSub')
       shopifyAuthenticatedFetch('/api/subscription-url').then(async (res) => {
         var url = (await res.json())['url'];
-        console.log(url);       
+        top.location.href = url;
       });
     }
   </script>

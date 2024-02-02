@@ -29,18 +29,19 @@ def subscription(request):
     print(discount, 'discount')
     if discount:
         price = full_price * ((100 - discount) / 100)
-        plan = f"{plan_name} - {discount}% discount"
+        plan = f"{plan_name} - {str(discount)}% discount"
     else:
         price = full_price
         plan = plan_name
     charge = shopify.RecurringApplicationCharge.create(
             {
                 "name": plan,
-                "price": price,
+                "price": str(price),
                 "return_url": request.build_absolute_uri('/'),
                 "trial_days": 3,
                 "test": True,
             }
         )
 
-    return charge.confirmation_url
+    url = charge.confirmation_url
+    return JsonResponse({'url': url })
