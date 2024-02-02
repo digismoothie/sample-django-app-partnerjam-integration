@@ -1,6 +1,15 @@
-# Sample Django App
+# Sample Django App with PartnerJam integration
 
 A demo app created using Django and ShopifyAPI `v8.4+`.
+
+## PartnerJam Integration
+Link to the relevant parts of codebase demonstrating PartnerJam integration. 
+
+- [Step 1 - Endpoint for storing the cookie](sample_django_app/shopify_app/views.py#L206)
+- [Step 2 - Notifying PartnerJam about the installation](sample_django_app/shopify_app/views.py#L48)
+- [Step 3 - Getting the discount from PartnerJam and creating charge](sample_django_app/api/views.py#L23)
+- [PartnerJam client](sample_django_app/shopify_app//partnerjam.py)
+
 
 ## Quick start
 
