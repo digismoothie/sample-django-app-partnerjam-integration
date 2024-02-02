@@ -8,6 +8,8 @@ class Shop(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    partnerjam_token = models.CharField(max_length=255, null=True, blank=True)
+
     def __str__(self):
         return "id: {id}, shop: {shop}, token: {token}, access_scopes: {access_scopes}".format(
             id=self.pk,

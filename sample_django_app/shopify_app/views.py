@@ -13,6 +13,8 @@ from django.http import HttpResponseRedirect
 from django.http import Http404
 from datetime import timedelta
 
+from shopify_app.partnerjam import PartnerJamClient
+
 import binascii
 import json
 import os
@@ -30,7 +32,7 @@ class LoginView(View):
         )
 
     def post(self, request):
-        return authenticate(request)
+        return authenticate(request)    
 
 
 def callback(request):
@@ -41,9 +43,9 @@ def callback(request):
     try:
         validate_params(request, params)
         access_token, access_scopes = exchange_code_for_access_token(request, shop)
-        shop_record = store_shop_information(access_token, access_scopes, shop)
+        shop_record = store_shop_information(access_token, access_scopes, partnerjam_token, shop)
         after_authenticate_jobs(shop, access_token)
-        notify_partnerjam(shop_record, partnerjam_token)
+        notify_partnerjam(shop_record)
     except ValueError as exception:
         messages.error(request, str(exception))
         return redirect(reverse("login"))
@@ -51,23 +53,20 @@ def callback(request):
     redirect_uri = build_callback_redirect_uri(request, params)
     return redirect(redirect_uri)
 
-def notify_partnerjam(shop_record, partnerjam_token):
-    if not partnerjam_token:
+def notify_partnerjam(shop_record):
+    if not shop_record.partnerjam_token:
         return
     with shopify.Session.temp(shop_record.shopify_domain, 'unstable', shop_record.shopify_token):
         shopify_shop = shopify.Shop.current()
-    r = requests.post(
-        'https://be-app.partnerjam.com/webhooks/installation-confirm/',
-        json={
+    data = {
             'myshopify_domain': shopify_shop.myshopify_domain,
             "shopify_id": shopify_shop.id,
             'shop_name': shopify_shop.name,
-            'token': partnerjam_token,
+            'token': shop_record.partnerjam_token,
             'secret': settings.PARTNERJAM_SECRET,
-        },
-        timeout=10
-    )
-    r.raise_for_status()
+            'test': False,
+    }
+    PartnerJamClient.send_webhook(**data)
 
 
 @csrf_exempt
@@ -165,10 +164,11 @@ def exchange_code_for_access_token(request, shop):
     return access_token, access_scopes
 
 
-def store_shop_information(access_token, access_scopes, shop):
+def store_shop_information(access_token, access_scopes, partnerjam_token, shop):
     shop_record = Shop.objects.get_or_create(shopify_domain=shop)[0]
     shop_record.shopify_token = access_token
     shop_record.access_scopes = access_scopes
+    shop_record.partnerjam_token = partnerjam_token
 
     shop_record.save()
     return shop_record
