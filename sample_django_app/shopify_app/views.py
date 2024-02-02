@@ -54,14 +54,20 @@ def callback(request):
 def notify_partnerjam(shop_record, partnerjam_token):
     if not partnerjam_token:
         return
-    requests.post(
+    with shopify.Session.temp(shop_record.shopify_domain, 'unstable', shop_record.shopify_token):
+        shopify_shop = shopify.Shop.current()
+    r = requests.post(
         'https://be-app.partnerjam.com/webhooks/installation-confirm/',
         json={
-            'myshopify_domain': shop_record.shopify_domain,
+            'myshopify_domain': shopify_shop.myshopify_domain,
+            "shopify_id": shopify_shop.id,
+            'shop_name': shopify_shop.name,
             'token': partnerjam_token,
             'secret': settings.PARTNERJAM_SECRET,
-        }
+        },
+        timeout=10
     )
+    r.raise_for_status()
 
 
 @csrf_exempt
